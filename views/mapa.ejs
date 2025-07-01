@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa de Usuarios</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 500px; width: 100%; }
+  </style>
+</head>
+<body>
+  <h2>Usuarios en el mapa</h2>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([13.7, -89.2], 8); // Ajusta el centro y zoom según tu país
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    fetch('/usuarios-coordenadas')
+      .then(res => res.json())
+      .then(usuarios => {
+        usuarios.forEach(u => {
+          if(u.lat && u.lng) {
+            L.marker([u.lat, u.lng]).addTo(map)
+              .bindPopup(u.full_name);
+          }
+        });
+      });
+  </script>
+</body>
+</html>

@@ -117,15 +117,48 @@ app.get('/registro', (req, res) => {
 
 // RUTA DE REGISTRO (POST)
 app.post('/registro', async (req, res) => {
-  const { full_name, email, username, telefono, departamento, direccion, municipio, password } = req.body;
+  console.log(req.body); 
+  const {
+    full_name,
+    email,
+    username,
+    telefono,
+    departamento,
+    direccion,
+    municipio,
+    password,
+    lat,
+    lng,
+  } = req.body;
+  
+  // Convertir a número real
+  const latParsed = parseFloat(lat);
+  const lngParsed = parseFloat(lng);
+  
+  console.log("Coordenadas recibidas:", { lat, lng });
+  console.log("Coordenadas parseadas:", { latParsed, lngParsed });
+
 
   try {
     // Insertar el usuario en la base de datos
     const query = `
-      INSERT INTO usuarios (full_name, email, username, telefono, departamento, direccion, municipio, password)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO usuarios (full_name, email, username, telefono, departamento, direccion, municipio, password, lat, lng)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    db.prepare(query).run(full_name, email, username, telefono, departamento, direccion, municipio, password);
+    db.prepare(query).run(
+      full_name,
+      email,
+      username,
+      telefono,
+      departamento,
+      direccion,
+      municipio,
+      password,
+      isNaN(latParsed) ? null : latParsed,
+      isNaN(lngParsed) ? null : lngParsed
+    );
+
+
 
     // Configurar transporte de correo
     const transporter = nodemailer.createTransport({
@@ -183,6 +216,17 @@ app.get('/auth/facebook/callback',
     res.redirect('/');
   }
 );
+
+
+
+app.get('/usuarios-coordenadas', (req, res) => {
+  const usuarios = db.prepare('SELECT id, full_name, lat, lng FROM usuarios WHERE lat IS NOT NULL AND lng IS NOT NULL').all();
+  res.json(usuarios);
+});
+
+app.get('/mapa', (req, res) => {
+  res.render('mapa');
+});
 
 // Iniciar servidor
 app.listen(PORT, () => {

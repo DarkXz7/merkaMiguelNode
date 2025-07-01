@@ -19,4 +19,19 @@ db.prepare(`
   )
 `).run();
 
+// Agregar columnas lat y lng si no existen
+try {
+  db.prepare('ALTER TABLE usuarios ADD COLUMN lat REAL').run();
+  console.log('Columna lat agregada');
+} catch (e) {
+  console.log('La columna lat ya existe o hubo un error:', e.message);
+}
+
+try {
+  db.prepare('ALTER TABLE usuarios ADD COLUMN lng REAL').run();
+  console.log('Columna lng agregada');
+} catch (e) {
+  console.log('La columna lng ya existe o hubo un error:', e.message);
+}
+
 module.exports = db;
